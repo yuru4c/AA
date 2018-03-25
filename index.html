@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="ja"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>AA Preview</title>
+
+<style type="text/css">
+#input, #output { font: inherit; }
+#input, #output { /* 1 */ }
+
+html {
+	-webkit-text-size-adjust: none;
+	   -moz-text-size-adjust: none;
+	    -ms-text-size-adjust: none;
+	background-color: #000;
+	color: #fff;
+}
+label {
+	display: inline-block;
+}
+.input {
+	border: solid 1px #333;
+	font-size: inherit !important;
+	background-color: #111;
+	color: inherit;
+}
+
+.disabled {
+	color: #bbb;
+	text-decoration: line-through;
+}
+.dim {
+	color: #ccc;
+}
+
+.pre #white-space {
+	color: inherit;
+	text-decoration: inherit;
+}
+
+#input {
+	box-sizing: border-box;
+	margin-top: .5em;
+	width: 100%;
+	resize: none;
+	overflow-y: hidden;
+	white-space: pre;
+	word-wrap: normal;
+}
+#output {
+	white-space: nowrap;
+}
+.pre #output {
+	white-space: pre;
+}
+</style>
+</head><body>
+
+<p>
+	<label id="fonts">
+		font: <input class="input" id="font" value="1em/1.125 sans-serif">;
+	</label>
+	<label class="disabled" id="white-space">
+		<input id="pre" type="checkbox">white-space: pre;
+	</label>
+	
+	<textarea class="input" id="input"></textarea>
+</p>
+
+<p id="output"></p>
+
+<script type="text/javascript" src="aa.js"></script>
+<!--<script type="text/javascript" src="aa.min.js"></script>-->
+<script type="text/javascript">
+(function ($) {
+
+var dim = 'dim';
+var lt = /\x3c/g, nl = /\n/g, el = /^\n+|\n+$/gm;
+
+function lazy(handler) {
+	var waiting = false; var id;
+	function timeout() {
+		handler();
+		waiting = false;
+	}
+	return function () {
+		if (waiting) clearTimeout(id);
+		else waiting = true;
+		id = setTimeout(timeout, 400);
+	};
+}
+
+function lines(text, separator, append, tag) {
+	var parent = tag ?
+		$.createElement(tag) :
+		$.createDocumentFragment();
+	var i = 0;
+	for (var match; match = separator.exec(text); ) {
+		var j = match.index, l = match[0].length;
+		if (j != 0) append(parent, text.substring(i, j));
+		i = j + l;
+		while (l--) parent.appendChild($.createElement('br'));
+	}
+	if (i != text.length) append(parent, text.substring(i));
+	return parent;
+}
+
+function text(parent, str) {
+	parent.appendChild($.createTextNode(str));
+}
+function spans(parent, str) {
+	var l = str.length, c = (l - 1 >> 12) + 1, r = l % c;
+	l = (l - r) / c + 1;
+	for (var i = 0, j = 0; i < c; r = c, l--)
+	for (; i < r; i++, j += l)
+		parent.appendChild(lines(str.substr(j, l), nl, text, 'span'));
+}
+
+function grow(input, dimension) {
+	var style = input.style;
+	var Dimension =
+		dimension[0].toUpperCase() +
+		dimension.substring(1);
+	var offsetDimension = 'offset' + Dimension;
+	var clientDimension = 'client' + Dimension;
+	var scrollDimension = 'scroll' + Dimension;
+	
+	return function () {
+		style[dimension] = '';
+		style[dimension] =
+			input[offsetDimension] -
+			input[clientDimension] +
+			input[scrollDimension] + 'px';
+	};
+}
+
+function toggle(classList, boolean, token) {
+	classList[boolean ? 'add' : 'remove'](token);
+}
+
+$.addEventListener('DOMContentLoaded', function () {
+	var fonts  = $.getElementById('fonts');
+	var font   = $.getElementById('font');
+	var pre    = $.getElementById('pre');
+	var input  = $.getElementById('input');
+	var output = $.getElementById('output');
+	var style  = $.styleSheets[0].cssRules[1].style;
+	var bodyClass   = $.body.classList;
+	var fontsClass  = fonts .classList;
+	var outputClass = output.classList;
+	
+	var ready = true; var id = 0;
+	function callback() {
+		outputClass.remove(dim);
+		id = 0;
+		ready = true;
+	}
+	var aa = lazy(function () {
+		id = processAA('#output', callback);
+	});
+	function write() {
+		if (ready) {
+			outputClass.add(dim);
+			ready = false;
+		} else if (id) {
+			processAA.abort(id);
+			id = 0;
+		}
+		output.innerHTML = input.value.replace(lt, '&lt;');
+		var text = output.textContent;
+		output.innerHTML = '';
+		output.appendChild(lines(text, el, spans));
+		aa();
+	}
+	
+	var value = font.getAttribute('value');
+	font.placeholder = value;
+	
+	var growFont  = grow(font,  'width');
+	var growInput = grow(input, 'height');
+	
+	var prev;
+	function onfont() {
+		style.font = '';
+		style.font = font.value;
+		growFont();
+		
+		var value = style.font;
+		if (value == prev) return; prev = value;
+		toggle(fontsClass, !value, 'disabled');
+		growInput();
+		(ready || id ? write : aa)();
+	}
+	function onpre() {
+		toggle(bodyClass, pre.checked, 'pre');
+	}
+	onpre();
+	onfont();
+	
+	addEventListener('resize', lazy(growInput));
+	font.addEventListener('input', onfont);
+	font.addEventListener('change', function () {
+		if (this.value) return;
+		this.value = value;
+		onfont();
+	});
+	pre.addEventListener('change', onpre);
+	input.addEventListener('input', function () {
+		growInput(); write();
+	});
+});
+
+})(document);
+</script>
+</body></html>
