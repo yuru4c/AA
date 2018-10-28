@@ -25,8 +25,8 @@ function getWidth(span) {
 	return span.getBoundingClientRect().width;
 }
 
-function Diff(char, width, expect) {
-	this.char = char;
+function Diff(ch, width, expect) {
+	this.ch = ch;
 	this.width = width;
 	this.value = expect - width;
 }
@@ -36,8 +36,8 @@ function isMutable() {
 }
 Diff.prototype.isMutable = function() {
 	this.isMutable = isMutable;
-	var char = this.char;
-	return this.mutable = this.measure.widthOf(char + char) < this.width * 2;
+	var ch = this.ch;
+	return this.mutable = this.measure.widthOf(ch + ch) < this.width * 2;
 };
 
 var noDiff = new Diff('', 0, 0);
@@ -69,23 +69,23 @@ measure.widthOf = function (str) {
 	return getWidth(span);
 };
 
-function diffOf(char) {
+function diffOf(ch) {
 	var c = this.cache;
-	var diff = char in c ? c[char] :
-	           char in _ ? c[char] =
-		new Diff(char, this.widthOf(char), _[char] * c.em)
+	var diff = ch in c ? c[ch] :
+	           ch in _ ? c[ch] =
+		new Diff(ch, this.widthOf(ch), _[ch] * c.em)
 		: noDiff;
 	diff.measure = this;
 	return diff;
 }
-measure.diffOf = function (char) {
+measure.diffOf = function (ch) {
 	this.diffOf = diffOf;
 	var s = getComputedStyle(this.element);
 	var size = s.fontSize;
 	var font = s.fontVariant + s.fontWeight + size + s.fontFamily;
 	this.cache = font in caches ? caches[font] :
 		caches[font] = new Cache(size);
-	return this.diffOf(char);
+	return this.diffOf(ch);
 };
 
 // 描画されていない要素か
@@ -129,11 +129,11 @@ function create(str, measure) {
 	var fragment = $.createDocumentFragment();
 	var prev = noDiff;
 	var h = 0, i = 0;
-	var char = str.charAt(0);
-	if (char) {
-		prev = measure.diffOf(char);
-		while (char = str.charAt(++i)) {
-			var diff = measure.diffOf(char);
+	var ch = str.charAt(0);
+	if (ch) {
+		prev = measure.diffOf(ch);
+		while (ch = str.charAt(++i)) {
+			var diff = measure.diffOf(ch);
 			if (diff.value != prev.value || prev.isMutable() || diff.isMutable()) {
 				fragment.appendChild(part(str.substring(h, i), prev));
 				prev = diff;
@@ -201,5 +201,5 @@ function process(selectors, callback) {
 process.abort = abort;
 return process;
 
-// KB927490 を適用した Windows 7, IE8 による cwtable の出力
-})([{},{0:0},{5:16},{4:9,7:10,9:11,13:8,14:1},{11:6,17:7},{20:13,32:15,33:14,49:12,50:-1,51:5,60:4,62:3,63:2},{96:-3,123:-2},{86:-5},{168:30,169:27,170:56,171:52,174:-10,175:-7,192:-13,193:-9,194:-6,195:21,196:35,197:18,198:22,388:-4,389:34,390:31,391:25},{398:32,399:79,400:49,401:24,402:155,403:83,404:73,405:19,406:144,407:57,408:36,409:33,410:50,411:151,412:47,413:53,414:96,415:48,416:58,976:17,977:45,978:23,979:28,980:63,981:-8,982:29,983:20},{834:-20,835:-14,836:-35,837:137,838:-16,839:-29,840:1271,841:1098,842:2458,843:1633,844:107,845:123,846:139,847:77,848:-12,849:59,850:158,851:372,852:78,853:55,854:1539,855:239,856:75,857:46,858:118,859:98,860:38,861:66,862:60,863:54,864:67,865:69,866:26,867:253,868:97,869:61,870:68,871:193,872:112,873:65,874:37,875:84,876:39,877:169,878:88,879:43,880:91,881:86,882:44,883:101,884:249,885:145,886:125,887:133,888:162,889:110,890:43940,891:94,892:149,893:760,894:71,895:185}],'wxln59uT/dn2+/t+fe+/3KM8+UvyK6X8R0xeXnnE58sX5FbPc45x81X5x37yP2P2+1xX24Hjsf/CLHDAz82dTy7K5c6evef733vxc/6Rzfp+Ts8o58/k5Wfn/TPSfN7PKK16WOsB9fZ2dnZ2d/fkaFqampqbMZjMZi+vvR5fR/8VvpWkX6LQ08TxM0zTN9fX7Ve+zs7O9LRHW63i8Xi8Xii0Wi319fX19fZdN5FaKRSO+gZPPohFCC+kF4wPr7/JrHme5I/aT0cE6t/9H/334v79Y/88/aTycs3l9HtI8+SPyxO32k7yEV70VZ9jq37c59M6OXy+D787zMyj93nvY7meS0U7P4PPw+8GDmt/nmJJ0mdoLrCWmx1e2iLuEXsddkDK7yYH8zTpwmuI/qXAXV9E+7Pk7Q7SefJJ52jbKTso+y87Ozv8+rsvLzqb/HTo4E196fVSL6+yk87R0lJeUnU10dHSUfX19lJTzpyfeMpTjJ9/MD6+9Ksmpqb0sBIpro6Ts7O8K+dnZ194yl2kHS0kHaUGtLOx9QVpeXl2mGSa007ei04V23bn58+f/eH2k9Se3vu3Jce339591PImVnrhJz2Y9uCrjn04NnPeWY8iwvrBn+bn3wvHPvqD9Ii5YWy6TrtPP5wVNnnymP89uBHmPTgso/8j/zhKjpvO1BFvZdF7KTHt6OHMdwtxPrlK9n2uV/zkueXnPmpPedPeZSjzhEqVIzy8ErlfT4nrmV3r2k9e0v+4E2znuX17fr9uV3O5bfN6r0qaR3S471+3r29WHvXt6+npWR0rIbAD8cmnty+BVnSyRDcismFaiNSofWMl6evT16evT/ekvT/ekvT16evT16evT16S9JYyVlJQ6x3vCfN657lHeue5R3r/pe3rHejOnkdLAMreOvCov6G4W9Pt5f+fdXen3V1lj6h9eFTQwt9lPr+ZUXeF1QVF/PSoKVqZ2tUO1qoVlzkasfz5U3r2vYSN/P7+MHGBSB5xhUg69Cr0UgqkOMPYkH9+g6EU6DoTHoSDO/wbSH+q5SGw3GFTGG9D/coYP1OOvbljPVXYwupjBjCpAp/AKfwZKQ9f4egwVSHH+BhYwwQwPPQe1IJ/pj0Ip0OcDAhm4wqVSB8VMb0OWMHX2pDB2P0GWwdiVq4T2PtJh6f1Pcup2OGGJcSG4YaxfhrNBrV+Gt3hUX8L+FZg90qqPdK1wKzIXML8F8CsUK10K146/BUCtfPdKqQrKhWRCwBWwBWwhfgvBVWFZY6xOsQrGCs0FwwXwK4WIXgvohcwuhWxBfgrNhVSF4KyYVsYX4K2Q6+gFwoVz3S+BWUC6FhOvwVhhaFkLoVmQvrBWGFZIKoFbKFkK2YKqwrMBWKFZwKqguGC+Hulw4WAK2cLhwvHulZ0LhwuIVngvrBWXCtoCtpC5hWKFY8KgVtQVYX4KxQuYVtYVngsIXMKxArbArGCttPdKxgqgX4L4FZwKsLhwv4VhhWOCoF9cKzQX4KxgvphW3BcOFbeF+CsQKz4XChWgC4hW4BW4hWbC+kFbkF0K3MK3QKzoX0AuhWIFbqFbsFbuFWFWF9cL6IWIVvAWQqrCt5Ct6CodZCqoK3sK4VnzDXhoK3w6LfQrfjtb+Lvb1wTZqT2+Un/HKX7H1fHxeDFSVOxwPjN/fLb2sG6jo6Zo/ee38g+dWWmb7j9vu7e3yPtNj5uUd5xP3YSOjpKc/J+5HnVkfX1P3YMZ15fU2fk7z1BdBeq');
+// Windows XP, Firefox ESR 52 による cwtable の出力
+})([{},{},{1:11,2:1,4:8},{10:9,12:10,14:16,15:0},{1:12,2:4,3:3,12:-1,13:5,14:2,15:6,27:7},{0:-3,44:13,46:14,47:15},{107:-2},{6:-7,7:-4,183:-5},{361:-6,362:34,363:30,365:-10,416:-13,417:-9},{16:288,17:35,18:59,19:46,20:118,21:98,22:48129,23:2341,720:177,721:210,728:1021,729:31,836:23,837:28,838:49,839:63,840:-8,841:20,842:48},{1686:32,1687:-20,1688:-14,1689:-35,1690:17,1691:57,1692:79,1693:149,1694:-16,1695:-29,1696:6533,1697:107,1698:267,1699:40,1700:84,1701:-12,1702:25,1703:21,1704:24,1705:317,1706:138,1707:73,1708:19,1709:144,1710:27,1711:2112}],'tn2NEOMwaaprHB5EN0ZsrGHFVtOCrKDhwrPpYwOKrdsbtuxQGbuDFsYRzW/b1AM3NuF+9LfoGihlC6F5z0VyE6IaF5dP23ER0ms21YIs4jx1NnkUTWbe+f25oMmQwwwwx2KtLypUqVDs7OzvJkW09bcK3GX1vFvTFCoVNptNyZMUBqhhhiOmcfj83m83m83T6fT8mTJkyZDlRVb7rdbmmv/NN/f2if/D9mRx+ac9sZWKeVsAx+On46axPG5/44rFPKpP+J62p+1jKxP+lNdGKv2+Ldvk3H4o06L62z32ezY0Jk3p300f+J3+MX6Fr8Hh359H293+/rS+puPnd9P4HfNzNG9nRUBgm0iDzPrNH4D+j1vxpqpT/U8rGUVmnoaMNZDhhhjiDQ4cMoPrYFTIjpFbyZDRWafo0cNGVMrKyjWTJkNGhIsyL2Gl7MjvAyZEbepUqI6Ct1MrKMMMXgxhhmRew5qD7c4cOah9lTUX22dOaIeNcheyNUAPeVENRj9qaxiGu8W/ZxXA5bDtQDn7aiBC2J+o/9rvjUP3hah9/4j9POpPcQOqFYw7cVAKw7RA41jj+OIP1ZUWalp+ccp8NHai3qbwy1cHx8wvh1vL3FjyntIpRQkUJhrCD11dWyngF5eiKtJ9nRcp5XKfzoBU4tjB8oPhxnRvMnCi58/qn7k/gxcOLlF2p4uUXaLP7VE/tGl//gf15/B9HVP6q7SfH2z/IrkVyK5F3I/yLuR/kVyK5FciuRXI/yP9s/2qzXrtxC8ii5sZuLmxm4udP5RduLZni3P6/9Wc37Xzq+WrkdeHHHXz+R18/tW+Pv8fL9Xd/2rtf94+d7O9/L39Z9r536J3/Z2r/cRdUXKZ1376foQ32X4Q3WXrlcDVZf1lwbkH73cO9XfYr1d4Vd97edfO+53W2y7ruDdYG7lc7td19jfUYEr7aG7LA3husvsdf9jr2WXLnXK8DrLguvtIbr7r8Kv12Xl3eFXfYrm36C48G6zrL8DYHlcwN67XZdegjvZL0EEPBHgS/Suu88PwT7/BTh+CvL7XwLetgv/9aH/2lfbPWj63bHv5RcAePUVBd5cFhxB0gWBy8NhsQQMCedjJymh6VlZTaxC14K8eW76bkCOa+nLxb11NijNxZ9Oy01lZRpYqdn7WW9ZMlOzQ7Mw5KhHSFo/t5e+A');
