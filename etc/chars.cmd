@@ -2,7 +2,7 @@
 SET font="%windir%\Fonts\msgothic.ttc"
 SET name="MS PGothic"
 
-REM TTFDump v1.8
+REM Windows XP  TTFDump v1.8
 
 SET dump=TTFDUMP %font% -nx -h
 SET cmap="%TMP%\cmap.txt"
@@ -26,11 +26,11 @@ FOR /F "delims=:" %%i IN ('FINDSTR /EINC:"Which Means:" %cmap%') DO (
 EXIT /B 1
 
 :write
-SET /A char=0x%1
-SET /P char="%char%," < NUL
+SET /P char="%1 " < NUL
 EXIT /B
 
 :read
 FOR /F "usebackq skip=%skip% tokens=2,3" %%i IN (%cmap%) DO (
 	IF "%%i"=="Char" (CALL :write %%j) ELSE (CALL :write %%i)
 )
+ECHO.

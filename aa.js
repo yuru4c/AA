@@ -10,7 +10,7 @@ var processAA = (function (h,b) { // h: ハフマンテーブル, b: Base64 文�
 
 // 文字幅テーブル
 var _ = {};
-// cwtable.html:29
+// cwtable.html:30
 for(var i=0,x,t=0,l=0,v,u=0,s=String.fromCharCode;x=b.charCodeAt(i++);){x=x&64?x&32?x-71:x-65:x&16?x+4:x>>2|62;for(var j=5;j>=0;j--){t=t<<1|x>>j&1;var g=h[l++];if(t in g){t=g[t];if(v)if(v<0){if(t)_[s(u)]=t;u++,v++}else{if(t)while(v--)_[s(u++)]=t;else u+=v;v=0}else v=t<0?t-1:t+1;t=l=0}}}
 
 var isAA = '__isAA'; // 完了フラグプロパティ名
