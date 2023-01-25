@@ -10,16 +10,15 @@ var processAA = (function (h,b) { // h: ハフマンテーブル, b: Base64 文�
 
 // 文字幅テーブル
 var _ = {};
-// cwtable.html:30
+// cwtable.js:1
 for(var i=0,x,t=0,l=0,v,u=0,s=String.fromCharCode;x=b.charCodeAt(i++);){x=x&64?x&32?x-71:x-65:x&16?x+4:x>>2|62;for(var j=5;j>=0;j--){t=t<<1|x>>j&1;var g=h[l++];if(t in g){t=g[t];if(v)if(v<0){if(t)_[s(u)]=t;u++,v++}else{if(t)while(v--)_[s(u++)]=t;else u+=v;v=0}else v=t<0?t-1:t+1;t=l=0}}}
 
 var isAA = '__isAA'; // 完了フラグプロパティ名
 var reS = /\S/;
 
-var $ = document;
 var px = 'px';
 function createSpan() {
-	return $.createElement('span');
+	return document.createElement('span');
 }
 function getWidth(span) {
 	return span.getBoundingClientRect().width;
@@ -64,7 +63,7 @@ measure.widthOf = function (str) {
 	this.widthOf = widthOf;
 	var span = createSpan();
 	span.style.whiteSpace = 'pre';
-	this.text = span.appendChild($.createTextNode(str));
+	this.text = span.appendChild(document.createTextNode(str));
 	this.span = this.element.appendChild(span);
 	return getWidth(span);
 };
@@ -105,7 +104,7 @@ measure.dispose = function () {
 
 function part(str, diff) {
 	var value = diff.value;
-	var node = $.createTextNode(str);
+	var node = document.createTextNode(str);
 	if (value || diff.isMutable()) {
 		var span = createSpan();
 		if (value) {
@@ -126,7 +125,7 @@ function part(str, diff) {
 	return node;
 }
 function create(str, measure) {
-	var fragment = $.createDocumentFragment();
+	var fragment = document.createDocumentFragment();
 	var prev = noDiff;
 	var h = 0, i = 0;
 	var ch = str.charAt(0);
@@ -178,8 +177,8 @@ find.exec = function (element) { // 幅優先探索
 	for (var node = element.firstChild; node; ) {
 		var next = node.nextSibling;
 		switch (node.nodeType) {
-		case Node.ELEMENT_NODE: this.defer(node); break;
-		case Node.TEXT_NODE:
+		case 1: this.defer(node); break;
+		case 3:
 			if (measure.isInvalid() || node[isAA]) break;
 			element.replaceChild(create(node.data, measure), node);
 			if (sync) sync = false;
@@ -193,7 +192,7 @@ find.exec = function (element) { // 幅優先探索
 // 指定されたセレクタの示す要素を処理　戻り値は処理の id
 function process(selectors, callback) {
 	var find = new Find(typeof callback == 'function' ? callback : null);
-	var elements = $.querySelectorAll(selectors);
+	var elements = document.querySelectorAll(selectors);
 	var l = elements.length;
 	for (var i = 0; i < l; i++) find.defer(elements[i]);
 	return find.id;
