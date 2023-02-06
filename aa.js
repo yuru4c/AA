@@ -55,6 +55,8 @@ function Measure(element) {
 }
 var measure = Measure.prototype;
 
+measure.span = null;
+
 function widthOf(str) {
 	this.text.data = str;
 	return getWidth(this.span);
