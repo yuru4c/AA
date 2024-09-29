@@ -148,6 +148,13 @@
 				var output = $.getElementById('output');
 				var style  = $.styleSheets[0].cssRules[1].style;
 				
+				var flag = window.location.hash.length > 1;
+				if (flag) {
+					input.style.display = 'none';
+					input.value = decodeURIComponent(
+						window.location.hash.slice(1));
+				}
+				
 				var ready = true; var id = 0;
 				function callback() {
 					output.className = '';
@@ -206,6 +213,10 @@
 				input.oninput = function () {
 					growInput(); write();
 				};
+				
+				if (flag) {
+					write();
+				}
 			};
 		})(document);
 	</script>
